@@ -24,7 +24,7 @@ def curtime():
 
 print curtime()+" Program begin "
 
-df = pd.read_csv('train.csv')
+df = pd.read_csv('../train.csv')
 
 train_size = 70000
 
@@ -37,7 +37,7 @@ y_train = np.array(df.iloc[:train_size,0])
 
 print curtime()+" Training data ready "
 
-df2 = pd.read_csv('test.csv')
+df2 = pd.read_csv('../test.csv')
 
 X_test = np.array(df2)
 
