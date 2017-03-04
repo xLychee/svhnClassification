@@ -16,6 +16,7 @@ from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import cross_val_score
 from sklearn import linear_model
+import sys
 
 
 def curtime():
@@ -32,10 +33,11 @@ X = np.array(df.iloc[:train_size,1:])
 
 mu = np.mean(X,axis=0)
 sigma = np.std(X,axis=0)
-X_train = (X-mu)/sigma    
+X_train = (X-mu)/sigma
 y_train = np.array(df.iloc[:train_size,0]) 
 
 print curtime()+" Training data ready "
+print 'Training data size: ', sys.getsizeof(X_train)
 
 df2 = pd.read_csv('../test.csv')
 
@@ -45,7 +47,7 @@ X_test = np.array(df2)
 
 X_test = (X_test-mu)/sigma
 
-print curtime()+" Test data ready "
+print curtime() + ' Test data ready '
 
 #test_X = np.array(df.iloc[-100:,1:])
 
