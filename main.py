@@ -68,6 +68,7 @@ y_test=model.predict(X_test)
 print curtime()+" prediction done "
 
 
+
 #scores = cross_val_score(model, X_norm, y, cv=5)
 
 #model.fit(X_norm,y).predict()
