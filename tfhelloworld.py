@@ -20,6 +20,10 @@ y_total_orz = np.load('../train_y.npy')
 total_size = 11000
 train_size = 10000
 
+batch_size = 50
+epochs = 2
+
+
 X_total = X_total[:total_size,:]
 X_total = X_total.astype(np.float32)/256
 y_total_orz = y_total_orz[:total_size]
@@ -100,11 +104,10 @@ correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 sess.run(tf.global_variables_initializer())
 
-batch_size = 50
 
 print curtime()+" Training begin "
 begintime = time.time()  
-for i in range(10000):
+for i in range(epochs*train_size/batch_size):
     batch_mask = np.random.choice(train_size, batch_size)
     X_batch = X_train[batch_mask]
     y_batch = y_train[batch_mask]
