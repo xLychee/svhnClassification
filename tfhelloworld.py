@@ -4,6 +4,7 @@ import tensorflow as tf
 #import matplotlib.pyplot as plt
 import time
 from datetime import timedelta
+from sklearn import model_selection
 
 def curtime():
     return time.asctime(time.localtime(time.time()))
@@ -17,17 +18,18 @@ sess = tf.InteractiveSession()
 X_total = np.load('../train_X.npy')
 y_total_orz = np.load('../train_y.npy')
 
-total_size = 71000
-train_size = 70000
+total_size = X_total.shape[0]
+test_size = 2000
+train_size = total_size - test_size
 
 batch_size = 50
 epochs = 100
 
 reg_para = 0.00003
 
-X_total = X_total[:total_size,:]
+#X_total = X_total[:total_size,:]
 X_total = X_total.astype(np.float32)/256
-y_total_orz = y_total_orz[:total_size]
+#y_total_orz = y_total_orz[:total_size]
 
 y_total = np.zeros((total_size,10))
 for i in xrange(total_size):
@@ -37,12 +39,16 @@ for i in xrange(total_size):
     else:
         y_total[i,label] = 1
 
-X_train = X_total[:train_size,:]
-y_train = y_total[:train_size,:]
-X_test = X_total[train_size:total_size,:]
-y_test = y_total[train_size:total_size,:]
+#X_train = X_total[:train_size,:]
+#y_train = y_total[:train_size,:]
+#X_test = X_total[train_size:total_size,:]
+#y_test = y_total[train_size:total_size,:]
 
-
+X_train,X_test,y_train,y_test = model_selection.train_test_split(X_total,y_total,test_size = test_size)
+assert X_train.shape[0]==train_size
+assert y_train.shape[0]==train_size
+print "Training data:", X_train.shape, y_train.shape
+print "Test data:",X_test.shape, y_test.shape
 #plt.imshow(X_train[6])
 #print y_train[6]
 #plt.imshow(X_test[8])
@@ -124,10 +130,9 @@ for i in range(totol_steps):
                 x:X_batch, y_: y_batch, keep_prob: 1.0})
         test_accuracy = accuracy.eval(feed_dict={
                 x:X_test, y_: y_test, keep_prob: 1.0})
-        print reg_para*regularizers.eval()
-        print loss.eval(feed_dict={
-                x:X_batch, y_: y_batch, keep_prob: 0.5})
         print("step %d/%d, used time %s, training accuracy %g, test accuracy %s" %(i,totol_steps, used_time, train_accuracy, test_accuracy))
+        print "regularization:",reg_para*regularizers.eval(),"loss:",loss.eval(feed_dict={
+                x:X_batch, y_: y_batch, keep_prob: 0.5})
     train_step.run(feed_dict={x: X_batch, y_: y_batch, keep_prob: 0.5})
 
 print curtime()+"Training complete "
