@@ -107,17 +107,18 @@ sess.run(tf.global_variables_initializer())
 
 print curtime()+" Training begin "
 begintime = time.time()  
-for i in range(epochs*train_size/batch_size):
+totol_steps = int(epochs*train_size/batch_size)
+for i in range(totol_steps):
     batch_mask = np.random.choice(train_size, batch_size)
     X_batch = X_train[batch_mask]
     y_batch = y_train[batch_mask]
-    if i%10 == 0:
+    if i%100 == 0:
         used_time = str(timedelta(seconds=int(time.time()-begintime)))
         train_accuracy = accuracy.eval(feed_dict={
                 x:X_batch, y_: y_batch, keep_prob: 1.0})
         test_accuracy = accuracy.eval(feed_dict={
                 x:X_test, y_: y_test, keep_prob: 1.0})
-        print("step %d, used time %s, training accuracy %g, test accuracy %s" %(i, used_time, train_accuracy, test_accuracy))
+        print("step %d/%d, used time %s, training accuracy %g, test accuracy %s" %(i,totol_steps, used_time, train_accuracy, test_accuracy))
     train_step.run(feed_dict={x: X_batch, y_: y_batch, keep_prob: 0.5})
 
 print curtime()+"Training complete "
