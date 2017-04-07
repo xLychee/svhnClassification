@@ -14,14 +14,14 @@ print curtime()+" Program begin "
 
 sess = tf.InteractiveSession()
 
-X_total = np.load('../train_x.npy')
+X_total = np.load('../train_X.npy')
 y_total_orz = np.load('../train_y.npy')
 
-total_size = 11000
-train_size = 10000
+total_size = 71000
+train_size = 70000
 
 batch_size = 50
-epochs = 2
+epochs = 100
 
 
 X_total = X_total[:total_size,:]
@@ -111,15 +111,31 @@ for i in range(epochs*train_size/batch_size):
     batch_mask = np.random.choice(train_size, batch_size)
     X_batch = X_train[batch_mask]
     y_batch = y_train[batch_mask]
-    if i%100 == 0:
+    if i%10 == 0:
         used_time = str(timedelta(seconds=int(time.time()-begintime)))
         train_accuracy = accuracy.eval(feed_dict={
                 x:X_batch, y_: y_batch, keep_prob: 1.0})
         test_accuracy = accuracy.eval(feed_dict={
                 x:X_test, y_: y_test, keep_prob: 1.0})
-        print("step %d, used time %s, training accuracy %g, test accuracy %g" %(i, used_time, train_accuracy, test_accuracy))
+        print("step %d, used time %s, training accuracy %g, test accuracy %s" %(i, used_time, train_accuracy, test_accuracy))
     train_step.run(feed_dict={x: X_batch, y_: y_batch, keep_prob: 0.5})
 
+print curtime()+"Training complete "
+
+
+test_X = np.load('../test_X.npy')
+#test_X = test_X[:10]
+test_m = test_X.shape[0]
+print curtime()+"Prediction begin "
+prediction = (tf.argmax(y_conv,1)).eval(feed_dict={x:test_X, keep_prob:1.0})
+prediction[prediction==0]=10
+dfout = pd.DataFrame()
+dfout['ImageId']= np.arange(test_m)
+dfout['label']=prediction
+dfout.to_csv('../result0.csv',index=False)
+
+
+print curtime()+"Program end "
 #print("test accuracy %g"%accuracy.eval(feed_dict={
 #    x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
 
