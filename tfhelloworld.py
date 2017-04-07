@@ -23,6 +23,7 @@ train_size = 70000
 batch_size = 50
 epochs = 100
 
+reg_para = 0.00003
 
 X_total = X_total[:total_size,:]
 X_total = X_total.astype(np.float32)/256
@@ -99,7 +100,12 @@ y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 cross_entropy = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
 
-train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+regularizers = tf.nn.l2_loss(W_conv1) + tf.nn.l2_loss(W_conv2) + \
+    tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(W_fc2)
+
+loss = cross_entropy + reg_para * regularizers
+
+train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
 correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 sess.run(tf.global_variables_initializer())
@@ -118,6 +124,9 @@ for i in range(totol_steps):
                 x:X_batch, y_: y_batch, keep_prob: 1.0})
         test_accuracy = accuracy.eval(feed_dict={
                 x:X_test, y_: y_test, keep_prob: 1.0})
+        print reg_para*regularizers.eval()
+        print loss.eval(feed_dict={
+                x:X_batch, y_: y_batch, keep_prob: 0.5})
         print("step %d/%d, used time %s, training accuracy %g, test accuracy %s" %(i,totol_steps, used_time, train_accuracy, test_accuracy))
     train_step.run(feed_dict={x: X_batch, y_: y_batch, keep_prob: 0.5})
 
