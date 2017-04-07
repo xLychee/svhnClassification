@@ -18,6 +18,8 @@ y2 = np.load('../extra_y.npy')
 
 X3 = np.vstack((X1,X2))
 y3 = np.hstack((y1,y2))
+assert X3.shape[0] == y3.shape[0]
+print y3.shape
 
-X3.save('../new_X.npy')
-y3.save('../new_y.npy')
+np.save('../new_X.npy',X3)
+np.save('../new_y.npy',y3)
