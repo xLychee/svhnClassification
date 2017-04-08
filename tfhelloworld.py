@@ -15,27 +15,17 @@ print curtime()+" Program begin "
 
 sess = tf.InteractiveSession()
 
-X_total = np.load('../train_X.npy')
-y_total_orz = np.load('../train_y.npy')
 
 BigTrain = 0
-if BigTrain == 1:
-    df = pd.read_csv('../extra.csv')
 
-    X = np.array(df.iloc[:,1:])
-    X = X.reshape(32, 32, 3, -1).transpose(3,0,1,2)
-    y = np.array(df.iloc[:,0])
-    print "extra data:", X.shape
-
-    m = X.shape[0]
-    assert m==y.shape[0]
-    mask = np.random.choice(m, 120000)
-    X2 = X[mask]
-    y2 = y[mask]
+if BigTrain == 0:    
+    X_total = np.load('../train_X.npy')
+    y_total_orz = np.load('../train_y.npy')
+else:
+    X_total = np.load('../new_X.npy')
+    y_total_orz = np.load('../new_y.npy')
     
-    X_total = np.vstack((X_total,X2))
-    y_total_orz = np.hstack((y_total_orz,y2))
-    print "new data:",  X_total.shape, y_total_orz.shape
+print "Total data:",  X_total.shape, y_total_orz.shape
 
 total_size = X_total.shape[0]
 test_size = 2000
@@ -148,8 +138,8 @@ sess.run(tf.global_variables_initializer())
 
 print curtime()+" Training begin "
 begintime = time.time()  
-totol_steps = int(epochs*train_size/batch_size)
-for i in range(totol_steps):
+total_steps = int(epochs*train_size/batch_size)
+for i in range(total_steps):
     batch_mask = np.random.choice(train_size, batch_size)
     X_batch = X_train[batch_mask]
     y_batch = y_train[batch_mask]
