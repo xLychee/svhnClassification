@@ -18,6 +18,25 @@ sess = tf.InteractiveSession()
 X_total = np.load('../train_X.npy')
 y_total_orz = np.load('../train_y.npy')
 
+BigTrain = 0
+if BigTrain == 1:
+    df = pd.read_csv('../extra.csv')
+
+    X = np.array(df.iloc[:,1:])
+    X = X.reshape(32, 32, 3, -1).transpose(3,0,1,2)
+    y = np.array(df.iloc[:,0])
+    print "extra data:", X.shape
+
+    m = X.shape[0]
+    assert m==y.shape[0]
+    mask = np.random.choice(m, 120000)
+    X2 = X[mask]
+    y2 = y[mask]
+    
+    X_total = np.vstack((X_total,X2))
+    y_total_orz = np.hstack((y_total_orz,y2))
+    print "new data:",  X_total.shape, y_total_orz.shape
+
 total_size = X_total.shape[0]
 test_size = 2000
 train_size = total_size - test_size
@@ -25,7 +44,7 @@ train_size = total_size - test_size
 batch_size = 50
 epochs = 100
 
-reg_para = 0.00003
+reg_para = 0.0001
 
 #X_total = X_total[:total_size,:]
 X_total = X_total.astype(np.float32)/256
@@ -60,18 +79,22 @@ y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
 
 def weight_variable(shape):
-  initial = tf.truncated_normal(shape, stddev=0.1)
-  return tf.Variable(initial)
+    initial = tf.truncated_normal(shape, stddev=0.1)
+    return tf.Variable(initial)
 
 def bias_variable(shape):
-  initial = tf.constant(0.1, shape=shape)
-  return tf.Variable(initial)
+    initial = tf.constant(0.1, shape=shape)
+    return tf.Variable(initial)
 
 def conv2d(x, W):
-  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
 def max_pool_2x2(x):
-  return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
+                        strides=[1, 2, 2, 1], padding='SAME')
+
+def avg_pool_2x2(x):
+    return tf.nn.avg_pool(x, ksize=[1, 2, 2, 1],
                         strides=[1, 2, 2, 1], padding='SAME')
 
 
@@ -89,11 +112,17 @@ b_conv2 = bias_variable([64])
 h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
 h_pool2 = max_pool_2x2(h_conv2)
 
-W_fc1 = weight_variable([8 * 8 * 64, 1024])
+W_conv3 = weight_variable([3,3,64,128])
+b_conv3 = bias_variable([128])
+
+h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
+h_pool3 = avg_pool_2x2(h_conv3)
+
+W_fc1 = weight_variable([4 * 4 * 128, 1024])
 b_fc1 = bias_variable([1024])
 
-h_pool2_flat = tf.reshape(h_pool2, [-1, 8*8*64])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+h_pool3_flat = tf.reshape(h_pool3, [-1, 4 * 4 * 128])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
 
 keep_prob = tf.placeholder(tf.float32)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
@@ -107,7 +136,7 @@ cross_entropy = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
 
 regularizers = tf.nn.l2_loss(W_conv1) + tf.nn.l2_loss(W_conv2) + \
-    tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(W_fc2)
+    tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(W_fc2) + tf.nn.l2_loss(W_conv3)
 
 loss = cross_entropy + reg_para * regularizers
 
