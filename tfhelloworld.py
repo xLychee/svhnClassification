@@ -149,7 +149,7 @@ for i in range(total_steps):
                 x:X_batch, y_: y_batch, keep_prob: 1.0})
         test_accuracy = accuracy.eval(feed_dict={
                 x:X_test, y_: y_test, keep_prob: 1.0})
-        print("step %d/%d, used time %s, training accuracy %g, test accuracy %s" %(i,totol_steps, used_time, train_accuracy, test_accuracy))
+        print("step %d/%d, used time %s, training accuracy %g, test accuracy %s" %(i,total_steps, used_time, train_accuracy, test_accuracy))
         print "regularization:",reg_para*regularizers.eval(),"loss:",loss.eval(feed_dict={
                 x:X_batch, y_: y_batch, keep_prob: 0.5})
     train_step.run(feed_dict={x: X_batch, y_: y_batch, keep_prob: 0.5})
