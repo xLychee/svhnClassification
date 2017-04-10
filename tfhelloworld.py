@@ -170,7 +170,7 @@ regularizers = tf.nn.l2_loss(W_conv1) + tf.nn.l2_loss(W_conv2) \
 
 loss = cross_entropy + reg_para * regularizers
 
-train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+train_step = tf.train.AdamOptimizer(1e-3).minimize(loss)
 correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 sess.run(tf.global_variables_initializer())
