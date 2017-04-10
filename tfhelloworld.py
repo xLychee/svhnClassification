@@ -34,7 +34,7 @@ train_size = total_size - test_size
 batch_size = 50
 epochs = 50
 
-reg_para = 0.00005
+reg_para = 0.0001
 
 #X_total = X_total[:total_size,:]
 X_total = X_total.astype(np.float32)/256
@@ -69,7 +69,7 @@ y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
 
 def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev=0.01)
+    initial = tf.truncated_normal(shape, stddev=0.1)
     return tf.Variable(initial)
 
 def bias_variable(shape):
@@ -102,6 +102,9 @@ h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
 h_pool1 = max_pool_2x2(h_conv2)
 #16*16*32
 
+keep_prob = tf.placeholder(tf.float32)
+h_pool1_drop = tf.nn.dropout(h_pool1, keep_prob)
+
 #W_conv2 = weight_variable([5, 5, 32, 64])
 #b_conv2 = bias_variable([64])
 W_conv3 = weight_variable([3,3,32,64])
@@ -110,11 +113,25 @@ b_conv3 = bias_variable([64])
 W_conv4 = weight_variable([3,3,64,64])
 b_conv4 = bias_variable([64])
 
-h_conv3 = tf.nn.relu(conv2d(h_pool1, W_conv3) + b_conv3)
+h_conv3 = tf.nn.relu(conv2d(h_pool1_drop, W_conv3) + b_conv3)
 h_conv4 = tf.nn.relu(conv2d(h_conv3, W_conv4) + b_conv4)
 
 h_pool2 = max_pool_2x2(h_conv4)
 #8*8*64
+h_pool2_drop = tf.nn.dropout(h_pool2, keep_prob)
+
+W_conv5 = weight_variable([3,3,64,128])
+b_conv5 = bias_variable([128])
+
+W_conv6 = weight_variable([3,3,128,128])
+b_conv6 = bias_variable([128])
+
+h_conv5 = tf.nn.relu(conv2d(h_pool2_drop, W_conv5) + b_conv5)
+h_conv6 = tf.nn.relu(conv2d(h_conv5, W_conv6) + b_conv6)
+
+h_pool3 = max_pool_2x2(h_conv6)
+# 4*4*128
+h_pool3_drop = tf.nn.dropout(h_pool3, keep_prob)
 
 #W_conv3 = weight_variable([3,3,64,128])
 #b_conv3 = bias_variable([128])
@@ -122,13 +139,12 @@ h_pool2 = max_pool_2x2(h_conv4)
 #h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
 #h_pool3 = avg_pool_2x2(h_conv3)
 
-W_fc1 = weight_variable([8 * 8 * 64, 1024])
+W_fc1 = weight_variable([4*4*128, 1024])
 b_fc1 = bias_variable([1024])
 
-h_pool2_flat = tf.reshape(h_pool2, [-1, 8 * 8 * 64])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+h_pool3_flat = tf.reshape(h_pool3_drop, [-1, 4*4*128])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
 
-keep_prob = tf.placeholder(tf.float32)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
 W_fc2 = weight_variable([1024, 512])
@@ -148,6 +164,7 @@ cross_entropy = tf.reduce_mean(
 
 regularizers = tf.nn.l2_loss(W_conv1) + tf.nn.l2_loss(W_conv2) \
      + tf.nn.l2_loss(W_conv3) + tf.nn.l2_loss(W_conv4) \
+     + tf.nn.l2_loss(W_conv5) + tf.nn.l2_loss(W_conv6) \
      + tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(W_fc2) \
      + tf.nn.l2_loss(W_fc3)
 
