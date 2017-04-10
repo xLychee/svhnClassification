@@ -34,7 +34,7 @@ train_size = total_size - test_size
 batch_size = 50
 epochs = 50
 
-reg_para = 0.0001
+reg_para = 0.00003
 
 #X_total = X_total[:total_size,:]
 X_total = X_total.astype(np.float32)/256
