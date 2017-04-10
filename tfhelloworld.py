@@ -147,17 +147,17 @@ h_fc1 = tf.nn.relu(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
 
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = weight_variable([1024, 512])
-b_fc2 = bias_variable([512])
+#W_fc2 = weight_variable([1024, 512])
+#b_fc2 = bias_variable([512])
 
-h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+#h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
-h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
+#h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
 
-W_fc3 = weight_variable([512, 10])
+W_fc3 = weight_variable([1024, 10])
 b_fc3 = bias_variable([10])
 
-y_conv = tf.matmul(h_fc2_drop, W_fc3) + b_fc3
+y_conv = tf.matmul(h_fc1_drop, W_fc3) + b_fc3
 
 cross_entropy = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
@@ -165,7 +165,7 @@ cross_entropy = tf.reduce_mean(
 regularizers = tf.nn.l2_loss(W_conv1) + tf.nn.l2_loss(W_conv2) \
      + tf.nn.l2_loss(W_conv3) + tf.nn.l2_loss(W_conv4) \
      + tf.nn.l2_loss(W_conv5) + tf.nn.l2_loss(W_conv6) \
-     + tf.nn.l2_loss(W_fc1) + tf.nn.l2_loss(W_fc2) \
+     + tf.nn.l2_loss(W_fc1)   \
      + tf.nn.l2_loss(W_fc3)
 
 loss = cross_entropy + reg_para * regularizers
@@ -222,3 +222,9 @@ print curtime()+"Program end "
 
 
 
+
+    
+    
+    
+    
+    
